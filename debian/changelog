@@ -1,0 +1,5 @@
+python-yaql (0.2.3-1) unstable; urgency=medium
+
+  * Initial release. (Closes: #762792)
+
+ -- Thomas Goirand <zigo@debian.org>  Thu, 25 Sep 2014 16:01:57 +0800
