@@ -1,3 +1,12 @@
+python-yaql (0.2.3-2) unstable; urgency=medium
+
+  * Also build-depends on python3-ply. This avoids FTBFS, because the package
+    was trying to download it from PyPi at build time, when running the unit
+    tests. Thanks to Daniel Schepler <dschepler@gmail.com> for the bug report,
+    and to Jonathan Wiltshire <jmw@debian.org> for the patch (Closes: #764987).
+
+ -- Thomas Goirand <zigo@debian.org>  Mon, 13 Oct 2014 17:01:29 +0800
+
 python-yaql (0.2.3-1) unstable; urgency=medium
 
   * Initial release. (Closes: #762792)
