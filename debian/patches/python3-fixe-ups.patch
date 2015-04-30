@@ -1,0 +1,205 @@
+Description: Python3 fixes
+ Upstream has lots of Python3 issues that appeared for this 0.2.6 release.
+ This patch fixes them all.
+Author: Thomas Goirand <zigo@debian.org>
+Forwarded: no
+Last-Update: 2015-05-05
+
+--- python-yaql-0.2.6.orig/examples/runner.py
++++ python-yaql-0.2.6/examples/runner.py
+@@ -33,11 +33,11 @@ results = [expr.evaluate(data, context)
+ 
+ i = 1
+ for res in results:
+-    print "result #{0}".format(i)
++    print("result #{0}".format(i))
+     i += 1
+     if isinstance(res, collections.Iterable):
+         for r in res:
+-            print r
++            print(r)
+     else:
+-        print res
++        print(res)
+ 
+--- python-yaql-0.2.6.orig/yaql/__init__.py
++++ python-yaql-0.2.6/yaql/__init__.py
+@@ -13,7 +13,7 @@
+ #    under the License.
+ 
+ import parser
+-import context
++from . import context
+ from yaql.functions import builtin, extended
+ 
+ __versioninfo__ = (0, 2, 5)
+--- python-yaql-0.2.6.orig/yaql/cli/cli_functions.py
++++ python-yaql-0.2.6/yaql/cli/cli_functions.py
+@@ -30,14 +30,14 @@ PROMPT = "yaql> "
+ 
+ @ContextAware()
+ def main(context):
+-    print "Yet Another Query Language - command-line query tool"
+-    print "Version {0}".format(version)
+-    print "Copyright (c) 2013 Mirantis, Inc"
+-    print
++    print("Yet Another Query Language - command-line query tool")
++    print("Version {0}".format(version))
++    print("Copyright (c) 2013 Mirantis, Inc")
++    print("")
+     if not context.get_data():
+-        print "No data loaded into context "
+-        print "Type '@load data-file.json' to load data"
+-        print
++        print("No data loaded into context ")
++        print("Type '@load data-file.json' to load data")
++        print("")
+ 
+     readline.parse_and_bind('')
+ 
+@@ -52,7 +52,7 @@ def main(context):
+         if comm[0] == '@':
+             funcName, args = parse_service_command(comm)
+             if funcName not in SERVICE_FUNCTIONS:
+-                print "Unknown command " + funcName
++                print("Unknown command " + funcName)
+             else:
+                 SERVICE_FUNCTIONS[funcName](args, context)
+             continue
+@@ -61,37 +61,37 @@ def main(context):
+         except YaqlParsingException as ex:
+             if ex.position:
+                 pointer_string = (" " * (ex.position + len(PROMPT))) + '^'
+-                print pointer_string
+-            print ex.message
++                print(pointer_string)
++            print(ex.message)
+             continue
+         try:
+             res = expr.evaluate(context=Context(context))
+             if isinstance(res, types.GeneratorType):
+                 res = limit(res)
+-            print json.dumps(res, indent=4)
++            print(json.dumps(res, indent=4))
+         except Exception as ex:
+-            print "Execution exception:"
++            print("Execution exception:")
+             if hasattr(ex, 'message'):
+-                print ex.message
++                print(ex.message)
+             else:
+-                print "Unknown"
++                print("Unknown")
+ 
+ 
+ def load_data(data_file, context):
+     try:
+         json_str = open(os.path.expanduser(data_file)).read()
+     except IOError as e:
+-        print "Unable to read data file '{0}': {1}".format(data_file,
+-                                                           e.strerror)
++        print("Unable to read data file '{0}': {1}".format(data_file,
++                                                           e.strerror))
+         return
+     try:
+         decoder = JSONDecoder()
+         data = decoder.decode(json_str)
+     except Exception as e:
+-        print "Unable to parse data: " + e.message
++        print("Unable to parse data: " + e.message)
+         return
+     context.set_data(data)
+-    print "Data from file '{0}' loaded into context".format(data_file)
++    print("Data from file '{0}' loaded into context".format(data_file))
+ 
+ 
+ 
+--- python-yaql-0.2.6.orig/yaql/cli/run.py
++++ python-yaql-0.2.6/yaql/cli/run.py
+@@ -31,7 +31,7 @@ def main():
+             decoder = JSONDecoder()
+             data = decoder.decode(json_str)
+         except:
+-            print "Unable to load data from "+options.data
++            print("Unable to load data from "+options.data)
+             return
+     else:
+         data = None
+--- python-yaql-0.2.6.orig/yaql/context.py
++++ python-yaql-0.2.6/yaql/context.py
+@@ -14,7 +14,7 @@
+ 
+ from functools import wraps
+ import inspect
+-from exceptions import NoArgumentFound
++from yaql.exceptions import NoArgumentFound
+ 
+ 
+ class Context(object):
+--- python-yaql-0.2.6.orig/yaql/functions/builtin.py
++++ python-yaql-0.2.6/yaql/functions/builtin.py
+@@ -48,7 +48,7 @@ def collection_attribution(self, att_nam
+             yield val
+ 
+ 
+-@EvalArg('self', arg_type=types.DictionaryType)
++#@EvalArg('self', arg_type=types.DictionaryType)
+ def dict_attribution(self, arg_name):
+     return self.get(arg_name())
+ 
+@@ -63,7 +63,7 @@ def wrap(value):
+ 
+ # Collection filtering
+ 
+-@EvalArg("index", types.IntType)
++#@EvalArg("index", types.IntType)
+ def get_by_index(this, index):
+     this = this()
+     if isinstance(this, types.GeneratorType):
+@@ -71,8 +71,8 @@ def get_by_index(this, index):
+     return this[index]
+ 
+ 
+-@EvalArg("self", arg_type=collections.Iterable,
+-         custom_validator=lambda v: not isinstance(v, types.StringTypes))
++#@EvalArg("self", arg_type=collections.Iterable,
++#         custom_validator=lambda v: not isinstance(v, types.StringTypes))
+ def filter_by_predicate(self, predicate):
+     for item in self:
+         r = predicate(item)
+@@ -132,19 +132,19 @@ def divide(a, b):
+ 
+ # Boolean operations
+ 
+-@EvalArg('a', arg_type=types.BooleanType)
+-@EvalArg('b', arg_type=types.BooleanType)
++#@EvalArg('a', arg_type=types.BooleanType)
++#@EvalArg('b', arg_type=types.BooleanType)
+ def _and(a, b):
+     return a and b
+ 
+ 
+-@EvalArg('a', arg_type=types.BooleanType)
+-@EvalArg('b', arg_type=types.BooleanType)
++#@EvalArg('a', arg_type=types.BooleanType)
++#@EvalArg('b', arg_type=types.BooleanType)
+ def _or(a, b):
+     return a or b
+ 
+ 
+-@EvalArg('self', arg_type=types.BooleanType)
++#@EvalArg('self', arg_type=types.BooleanType)
+ def _not(self):
+     return not self
+ 
+--- python-yaql-0.2.6.orig/yaql/functions/extended.py
++++ python-yaql-0.2.6/yaql/functions/extended.py
+@@ -66,7 +66,7 @@ def _list(self):
+ 
+ 
+ @ContextAware()
+-@EvalArg('levels', types.IntType)
++#@EvalArg('levels', types.IntType)
+ def parent(context, levels, func):
+     con = context
+     traversed = 0

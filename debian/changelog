@@ -3,6 +3,7 @@ python-yaql (0.2.6-1) unstable; urgency=medium
   * New upstream release.
   * Fixed build-depends for this release.
   * Running unit tests using testr directly.
+  * Re-did Python3 fixups patch. This time it needed even more fixes.
 
  -- Thomas Goirand <zigo@debian.org>  Thu, 30 Apr 2015 22:40:42 +0000
 
