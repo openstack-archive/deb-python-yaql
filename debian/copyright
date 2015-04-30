@@ -1,6 +1,6 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: yaql
-Source: http://mirantis.com
+Source: git://github.com/stackforge/yaql.git
 
 Files: debian/*
 Copyright: (c) 2014, Thomas Goirand <zigo@debian.org>

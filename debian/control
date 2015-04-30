@@ -2,22 +2,42 @@ Source: python-yaql
 Section: python
 Priority: optional
 Maintainer: PKG OpenStack <openstack-devel@lists.alioth.debian.org>
-Uploaders: Thomas Goirand <zigo@debian.org>
+Uploaders: Thomas Goirand <zigo@debian.org>,
 Build-Depends: debhelper (>= 9),
-               python-all (>= 2.6.6-3~),
+               dh-python,
+               openstack-pkg-tools,
+               python-all,
+               python-pbr,
                python-setuptools,
+               python-sphinx,
                python3-all,
-               python3-setuptools
-Build-Depends-Indep: python-ply, python3-ply
+               python3-pbr,
+               python3-setuptools,
+Build-Depends-Indep: python-coverage,
+                     python-fixtures,
+                     python-hacking,
+                     python-oslosphinx (>= 2.5.0),
+                     python-ply,
+                     python-testscenarios,
+                     python-testtools,
+                     python3-babel,
+                     python3-fixtures,
+                     python3-ply,
+                     python3-testscenarios,
+                     python3-testtools,
+                     subunit,
+                     testrepository,
 Standards-Version: 3.9.6
 Vcs-Browser: http://anonscm.debian.org/gitweb/?p=openstack/python-yaql.git
 Vcs-Git: git://anonscm.debian.org/openstack/python-yaql.git
-Homepage: http://mirantis.com
+Homepage: https://github.com/stackforge/yaql
 
 Package: python-yaql
 Architecture: all
-Pre-Depends: dpkg (>= 1.15.6~)
-Depends: ${misc:Depends}, ${python:Depends}
+Depends: python-babel,
+         python-ply,
+         ${misc:Depends},
+         ${python:Depends},
 Description: Yet Another Query Language - Python 2.x
  At the beginning of millennium the growing trend towards data formats
  standardization and application integrability made XML extremely popular. XML
@@ -42,8 +62,10 @@ Description: Yet Another Query Language - Python 2.x
 
 Package: python3-yaql
 Architecture: all
-Pre-Depends: dpkg (>= 1.15.6~)
-Depends: ${misc:Depends}, ${python3:Depends}
+Depends: python3-babel,
+         python3-ply,
+         ${misc:Depends},
+         ${python3:Depends},
 Description: Yet Another Query Language - Python 3.x
  At the beginning of millennium the growing trend towards data formats
  standardization and application integrability made XML extremely popular. XML

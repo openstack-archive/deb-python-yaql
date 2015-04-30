@@ -1,3 +1,11 @@
+python-yaql (0.2.6-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Fixed build-depends for this release.
+  * Running unit tests using testr directly.
+
+ -- Thomas Goirand <zigo@debian.org>  Thu, 30 Apr 2015 22:40:42 +0000
+
 python-yaql (0.2.3-2) unstable; urgency=medium
 
   * Also build-depends on python3-ply. This avoids FTBFS, because the package

@@ -3,8 +3,9 @@
 PYTHONS:=$(shell pyversions -vr)
 PYTHON3S:=$(shell py3versions -vr)
 
-UPSTREAM_GIT = git://github.com/ativelkov/yaql.git
--include /usr/share/openstack-pkg-tools/pkgos.make
+UPSTREAM_GIT = git://github.com/stackforge/yaql.git
+include /usr/share/openstack-pkg-tools/pkgos.make
+export OSLO_PACKAGE_VERSION=$(VERSION)
 
 %:
 	dh $@ --buildsystem=python_distutils --with python2,python3
@@ -25,8 +26,17 @@ override_dh_install:
 
 override_dh_auto_test:
 ifeq (,$(findstring nocheck, $(DEB_BUILD_OPTIONS)))
-	set -e && for pyvers in $(PYTHONS) $(PYTHON3S); do \
-		python$$pyvers setup.py test ; \
+	@echo "===> Running tests"
+	set -e ; set -x ; for i in 2.7 $(PYTHON3S) ; do \
+		PYMAJOR=`echo $$i | cut -d'.' -f1` ; \
+		echo "===> Testing with python$$i (python$$PYMAJOR)" ; \
+		rm -rf .testrepository ; \
+		testr-python$$PYMAJOR init ; \
+		TEMP_REZ=`mktemp -t` ; \
+		PYTHONPATH=$(CURDIR) PYTHON=python$$i testr-python$$PYMAJOR run --subunit | tee $$TEMP_REZ | subunit2pyunit ; \
+		cat $$TEMP_REZ | subunit-filter -s --no-passthrough | subunit-stats ; \
+		rm -f $$TEMP_REZ ; \
+		testr-python$$PYMAJOR slowest ; \
 	done
 endif
 
