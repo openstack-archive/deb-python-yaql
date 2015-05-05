@@ -1,3 +1,10 @@
+python-yaql (0.2.6-2) unstable; urgency=medium
+
+  * (temporarily) removed Python 3 support from the package, as per discussion
+    with upstream, and until Murano is capable of using Yaql 1.0.x,
+
+ -- Thomas Goirand <zigo@debian.org>  Tue, 05 May 2015 08:58:19 +0000
+
 python-yaql (0.2.6-1) unstable; urgency=medium
 
   * New upstream release.
