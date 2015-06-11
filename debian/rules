@@ -22,7 +22,7 @@ override_dh_install:
 #	done
 	rm -rf $(CURDIR)/debian/python*-yaql/usr/lib/python*/dist-packages/*.pth
 	rm -rf $(CURDIR)/debian/python*-yaql/usr/lib/python*/dist-packages/examples
-	mv $(CURDIR)/debian/python-yaql/usr/bin/yaql $(CURDIR)/debian/python-yaql/usr/bin/python2-yaql
+#	mv $(CURDIR)/debian/python-yaql/usr/bin/yaql $(CURDIR)/debian/python-yaql/usr/bin/python2-yaql
 #	mv $(CURDIR)/debian/python3-yaql/usr/bin/yaql $(CURDIR)/debian/python3-yaql/usr/bin/python3-yaql
 
 override_dh_auto_test:
