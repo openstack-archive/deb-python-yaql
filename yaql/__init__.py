@@ -13,16 +13,16 @@
 #    under the License.
 
 import parser
-import context
+import yaql.context as context
 from yaql.functions import builtin, extended
 
-__versioninfo__ = (0, 2, 5)
+__versioninfo__ = (0, 2, 7)
 __version__ = '.'.join(map(str, __versioninfo__))
 __grammar_version__ = '1.0'
 
 
 def parse(expression, write_tables=False):
-    tabmodule = 'yaql_parser_t_v%s' % __grammar_version__
+    tabmodule = 'yaql_parser_t_v%s' % __grammar_version__.replace('.', '_')
     return parser.parse(expression, write_tables, tabmodule)
 
 
