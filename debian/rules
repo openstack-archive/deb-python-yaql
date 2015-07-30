@@ -43,7 +43,7 @@ endif
 
 override_dh_clean:
 	dh_clean -O--buildsystem=python_distutils
-	rm -rf build
+	rm -rf build .testrepository
 
 # Commands not to run
 override_dh_installcatalogs:
