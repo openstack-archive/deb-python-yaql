@@ -1,8 +1,12 @@
-python-yaql (0.2.7-1) unstable; urgency=medium
+python-yaql (0.2.7-1) experimental; urgency=medium
 
+  [ gustavo panizzo ]
   * New upstream release.
 
- -- gustavo panizzo <gfa@zumbi.com.ar>  Thu, 30 Jul 2015 12:35:46 +0800
+  [ Thomas Goirand ]
+  * Packaging from debian/experimental.
+
+ -- Thomas Goirand <zigo@debian.org>  Thu, 30 Jul 2015 20:22:05 +0000
 
 python-yaql (0.2.6-3) unstable; urgency=medium
 
