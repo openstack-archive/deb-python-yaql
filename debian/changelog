@@ -5,6 +5,7 @@ python-yaql (0.2.7-1) experimental; urgency=medium
 
   [ Thomas Goirand ]
   * Packaging from debian/experimental.
+  * Fixed watch file to not use pypi, but the github tag.
 
  -- Thomas Goirand <zigo@debian.org>  Thu, 30 Jul 2015 20:22:05 +0000
 
