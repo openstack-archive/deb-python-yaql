@@ -39,7 +39,7 @@ Depends: python-babel,
          python-ply,
          ${misc:Depends},
          ${python:Depends},
-Description: Yet Another Query Language - Python 2.x
+Description: Yet Another Query Language - Python 2.7
  At the beginning of millennium the growing trend towards data formats
  standardization and application integrability made XML extremely popular. XML
  became lingua franca of the data. Applications tended to process lots of XML
@@ -59,7 +59,7 @@ Description: Yet Another Query Language - Python 2.x
  but later on ports to other languages including Python were written. YAQL is
  one of the implementations in Python.
  .
- This package contains the Python 2.x module.
+ This package contains the Python 2.7 module.
 
 #Package: python3-yaql
 #Architecture: all
