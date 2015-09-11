@@ -1,4 +1,4 @@
-#    Copyright (c) 2013 Mirantis, Inc.
+#    Copyright (c) 2015 Mirantis, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -12,23 +12,115 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import parser
-import yaql.context as context
-from yaql.functions import builtin, extended
+import os.path
+import pkg_resources
 
-__versioninfo__ = (0, 2, 7)
-__version__ = '.'.join(map(str, __versioninfo__))
-__grammar_version__ = '1.0'
+from yaql.language import contexts
+from yaql.language import conventions
+from yaql.language import factory
+from yaql.language import specs
+from yaql.language import utils
+from yaql.language import yaqltypes
+from yaql.standard_library import boolean as std_boolean
+from yaql.standard_library import branching as std_branching
+from yaql.standard_library import collections as std_collections
+from yaql.standard_library import common as std_common
+from yaql.standard_library import math as std_math
+from yaql.standard_library import queries as std_queries
+from yaql.standard_library import regex as std_regex
+from yaql.standard_library import strings as std_strings
+from yaql.standard_library import system as std_system
+
+_cached_expressions = {}
+_cached_engine = None
+_default_context = None
 
 
-def parse(expression, write_tables=False):
-    tabmodule = 'yaql_parser_t_v%s' % __grammar_version__.replace('.', '_')
-    return parser.parse(expression, write_tables, tabmodule)
+def _setup_context(data, context, finalizer, convention):
+    if context is None:
+        context = contexts.Context(
+            convention=convention or conventions.CamelCaseConvention())
+
+    if finalizer is None:
+        @specs.parameter('iterator', yaqltypes.Iterable())
+        @specs.name('#iter')
+        def limit(iterator):
+            return iterator
+
+        @specs.inject('limiter', yaqltypes.Delegate('#iter'))
+        @specs.inject('engine', yaqltypes.Engine())
+        @specs.name('#finalize')
+        def finalize(obj, limiter, engine):
+            return utils.convert_output_data(obj, limiter, engine)
+
+        context.register_function(limit)
+        context.register_function(finalize)
+    else:
+        context.register_function(finalizer)
+
+    if data is not utils.NO_VALUE:
+        context['$'] = utils.convert_input_data(data)
+    return context
 
 
-def create_context(include_extended_functions=True):
-    cont = context.Context()
-    builtin.add_to_context(cont)
-    if include_extended_functions:
-        extended.add_to_context(cont)
-    return context.Context(cont)
+def create_context(data=utils.NO_VALUE, context=None, system=True,
+                   common=True, boolean=True, strings=True,
+                   math=True, collections=True, queries=True,
+                   regex=True, branching=True,
+                   no_sets=False, finalizer=None, delegates=False,
+                   convention=None):
+
+    context = _setup_context(data, context, finalizer, convention)
+    if system:
+        std_system.register(context, delegates)
+    if common:
+        std_common.register(context)
+    if boolean:
+        std_boolean.register(context)
+    if strings:
+        std_strings.register(context)
+    if math:
+        std_math.register(context)
+    if collections:
+        std_collections.register(context, no_sets)
+    if queries:
+        std_queries.register(context)
+    if regex:
+        std_regex.register(context)
+    if branching:
+        std_branching.register(context)
+    return context
+
+YaqlFactory = factory.YaqlFactory
+
+
+def detect_version():
+    try:
+        dist = pkg_resources.get_distribution('yaql')
+        location = os.path.normcase(dist.location)
+        this_location = os.path.normcase(__file__)
+        if not this_location.startswith(os.path.join(location, 'yaql')):
+            raise pkg_resources.DistributionNotFound()
+        return dist.version
+    except pkg_resources.DistributionNotFound:
+        return 'Undefined (package was not installed with setuptools)'
+
+__version__ = detect_version()
+
+
+def eval(expression, data=None):
+    global _cached_engine, _cached_expressions, _default_context
+
+    if _cached_engine is None:
+        _cached_engine = YaqlFactory().create()
+
+    engine = _cached_expressions.get(expression)
+    if engine is None:
+        engine = _cached_engine(expression)
+        _cached_expressions[expression] = engine
+
+    if _default_context is None:
+        _default_context = create_context()
+
+    return engine.evaluate(
+        data=data, context=_default_context.create_child_context())
