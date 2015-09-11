@@ -1,7 +1,7 @@
 #!/usr/bin/make -f
 
 PYTHONS:=$(shell pyversions -vr)
-#PYTHON3S:=$(shell py3versions -vr)
+PYTHON3S:=$(shell py3versions -vr)
 
 UPSTREAM_GIT = git://github.com/stackforge/yaql.git
 include /usr/share/openstack-pkg-tools/pkgos.make
@@ -12,18 +12,18 @@ export OSLO_PACKAGE_VERSION=$(VERSION)
 #,python3
 
 override_dh_install:
-	set -e && for pyvers in $(PYTHONS); do \
+	set -e ; for pyvers in $(PYTHONS); do \
 		python$$pyvers setup.py install --install-layout=deb \
 			--root $(CURDIR)/debian/python-yaql; \
 	done
-#	set -e && for pyvers in $(PYTHON3S); do \
-#		python$$pyvers setup.py install --install-layout=deb \
-#			--root $(CURDIR)/debian/python3-yaql; \
-#	done
+	set -e ; for pyvers in $(PYTHON3S); do \
+		python$$pyvers setup.py install --install-layout=deb \
+			--root $(CURDIR)/debian/python3-yaql; \
+	done
 	rm -rf $(CURDIR)/debian/python*-yaql/usr/lib/python*/dist-packages/*.pth
 	rm -rf $(CURDIR)/debian/python*-yaql/usr/lib/python*/dist-packages/examples
-#	mv $(CURDIR)/debian/python-yaql/usr/bin/yaql $(CURDIR)/debian/python-yaql/usr/bin/python2-yaql
-#	mv $(CURDIR)/debian/python3-yaql/usr/bin/yaql $(CURDIR)/debian/python3-yaql/usr/bin/python3-yaql
+	mv $(CURDIR)/debian/python-yaql/usr/bin/yaql $(CURDIR)/debian/python-yaql/usr/bin/python2-yaql
+	mv $(CURDIR)/debian/python3-yaql/usr/bin/yaql $(CURDIR)/debian/python3-yaql/usr/bin/python3-yaql
 
 override_dh_auto_test:
 ifeq (,$(findstring nocheck, $(DEB_BUILD_OPTIONS)))
