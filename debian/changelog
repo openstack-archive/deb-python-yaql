@@ -1,6 +1,7 @@
 python-yaql (1.0.1-5) experimental; urgency=medium
 
-  * Fixed non-ascii chars in README.rst causing FTBFS in Jessie.
+  * Fixed non-ascii chars in README.rst causing FTBFS in Jessie by adding
+    upstream patch: Documentation_structure_update.patch.
 
  -- Thomas Goirand <zigo@debian.org>  Wed, 16 Sep 2015 13:34:46 +0200
 
