@@ -25,11 +25,11 @@ index e583254..4a528ce 100644
 -nestedness it is quickly became obvious that there is a need for specially crafted domain specific languages to query
 -these data sets. This  is how XPath and later XQL were born.
 -
--With later popularization of REST services and Web 2.0 JSON started to take XMLâs place. JSONâs main advantage (besides
+-With later popularization of REST services and Web 2.0 JSON started to take XML’s place. JSON’s main advantage (besides
 -being simpler than XML) is that is closely reassembles data structures found in most programming languages (arrays,
 -dictionaries, scalars) making it very convenient for data serialization. As JSON lacked all the brilliant XML-related
 -technologies like XSLT, XML Schema, XPath etc. various attempts to develop similar languages for JSON were made. One of
--those efforts was JSONPath library developed in 2007 by Stefan GÃ¶ssner. Initial implementation was for PHP and
+-those efforts was JSONPath library developed in 2007 by Stefan Gössner. Initial implementation was for PHP and
 -JavaScript languages, but later on ports to other languages including Python were written.
 -
 -JSONPath allows navigation and querying, well, JSONs.
@@ -64,7 +64,7 @@ index e583254..4a528ce 100644
 -
 -then
 -
--`jsonpath(data, "$.customers[0].name") -> [âJohnâ]`
+-`jsonpath(data, "$.customers[0].name") -> [‘John’]`
 -`jsonpath(data, "$.customers[*].orders[*].order_id") -> [1, 2, 3]`
 -
 -But what if we need, for example to find order having ID = 2? Here is how it done in JSONPath:
