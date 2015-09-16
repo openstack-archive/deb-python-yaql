@@ -1,20 +1,15 @@
-From: Kirill Zaitsev <kzaitsev@mirantis.com>
+Author: Kirill Zaitsev <kzaitsev@mirantis.com>
+ Updated README to include some quickstart information and information on
+ what YAQL is.
+ Includes stubs for further expansion of YAQL documentation and proposes
+ general structure of how YAQL documentation might look like.
 Date: Wed, 26 Aug 2015 11:41:13 +0000 (+0300)
 Subject: Documentation structure update
 X-Git-Url: https://review.openstack.org/gitweb?p=stackforge%2Fyaql.git;a=commitdiff_plain;h=517f80e03cfcc7fabdd86558b9eab5cbe0ae10b7
-
-Documentation structure update
-
-Updated README to include some quickstart information and information on
-what YAQL is.
-Includes stubs for further expansion of YAQL documentation and proposes
-general structure of how YAQL documentation might look like.
-
 Targets blueprint: yaql-docs
-
 Change-Id: I65885bd132bb3efa5798aa0cb6f1774b2348a44e
-(cherry picked from commit f134c743b022518af9142ffb1943752bfe319ddc)
----
+Origin: upstream, https://review.openstack.org/#/c/224146/
+Last-Update: 2015-09-16
 
 diff --git a/README.rst b/README.rst
 index e583254..4a528ce 100644
