@@ -1,6 +1,7 @@
 python-yaql (1.0.2-1) experimental; urgency=medium
 
   * New upstream release.
+  * Removed doc patches.
 
  -- Thomas Goirand <zigo@debian.org>  Thu, 10 Dec 2015 10:45:25 +0100
 
