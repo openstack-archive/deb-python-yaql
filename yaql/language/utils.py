@@ -13,11 +13,13 @@
 #    under the License.
 
 import collections
+import re
 import sys
 
 import six
 
 from yaql.language import exceptions
+from yaql.language import lexer
 
 
 def create_marker(msg):
@@ -26,7 +28,7 @@ def create_marker(msg):
             return msg
     return MarkerClass()
 
-
+KEYWORD_REGEX = re.compile(lexer.Lexer.t_KEYWORD_STRING.__doc__.strip())
 NO_VALUE = create_marker('<NoValue>')
 
 
@@ -57,6 +59,7 @@ MappingType = collections.Mapping
 MutableMappingType = collections.MutableMapping
 IterableType = collections.Iterable
 IteratorType = collections.Iterator
+QueueType = collections.deque
 
 
 def convert_input_data(obj, rec=None):
@@ -180,20 +183,19 @@ def get_memory_quota(engine):
 
 def limit_iterable(iterable, limit_or_engine):
     if isinstance(limit_or_engine, int):
-        count = limit_or_engine
+        max_count = limit_or_engine
     else:
-        count = get_max_collection_size(limit_or_engine)
+        max_count = get_max_collection_size(limit_or_engine)
 
-    if count >= 0 and isinstance(iterable,
-                                 (SequenceType, MappingType, SetType)):
-        if len(iterable) > count:
-            raise exceptions.CollectionTooLargeException(count)
+    if isinstance(iterable, (SequenceType, MappingType, SetType)):
+        if 0 <= max_count < len(iterable):
+            raise exceptions.CollectionTooLargeException(max_count)
         return iterable
 
     def limiting_iterator():
         for i, t in enumerate(iterable):
-            if 0 <= count <= i:
-                raise exceptions.CollectionTooLargeException(count)
+            if 0 <= max_count <= i:
+                raise exceptions.CollectionTooLargeException(max_count)
             yield t
     return limiting_iterator()
 
@@ -227,3 +229,15 @@ def to_extension_method(name, context):
             spec.is_function = True
             spec.is_method = True
             yield spec
+
+
+def is_keyword(text):
+    return KEYWORD_REGEX.match(text) is not None
+
+
+def filter_parameters_dict(parameters):
+    parameters = dict(parameters)
+    for name in parameters.keys():
+        if not is_keyword(name):
+            del parameters[name]
+    return parameters

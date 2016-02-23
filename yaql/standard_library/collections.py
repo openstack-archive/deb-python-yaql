@@ -248,34 +248,6 @@ def combine_dicts(left, right, engine):
     return utils.FrozenDict(d)
 
 
-@specs.parameter('left', yaqltypes.Sequence())
-@specs.parameter('right', yaqltypes.Sequence())
-@specs.name('*equal')
-def eq(left, right):
-    return left == right
-
-
-@specs.parameter('left', yaqltypes.Sequence())
-@specs.parameter('right', yaqltypes.Sequence())
-@specs.name('*not_equal')
-def neq(left, right):
-    return left != right
-
-
-@specs.parameter('left', utils.MappingType)
-@specs.parameter('right', utils.MappingType)
-@specs.name('*equal')
-def eq_dict(left, right):
-    return left == right
-
-
-@specs.parameter('left', utils.MappingType)
-@specs.parameter('right', utils.MappingType)
-@specs.name('*not_equal')
-def neq_dict(left, right):
-    return left != right
-
-
 def is_list(arg):
     return utils.is_sequence(arg)
 
@@ -315,9 +287,7 @@ def delete(collection, position, count=1):
 
 
 @specs.method
-@specs.parameter('collection', yaqltypes.Iterable([
-    lambda t: not is_set(t)
-]))
+@specs.parameter('collection', yaqltypes.Iterable())
 @specs.parameter('position', int)
 @specs.parameter('count', int)
 def replace(collection, position, value, count=1):
@@ -452,20 +422,6 @@ def union(left, right):
 
 @specs.parameter('left', utils.SetType)
 @specs.parameter('right', utils.SetType)
-@specs.name('*equal')
-def set_eq(left, right):
-    return left == right
-
-
-@specs.parameter('left', utils.SetType)
-@specs.parameter('right', utils.SetType)
-@specs.name('*not_equal')
-def set_neq(left, right):
-    return left != right
-
-
-@specs.parameter('left', utils.SetType)
-@specs.parameter('right', utils.SetType)
 @specs.name('#operator_<')
 def set_lt(left, right):
     return left < right
@@ -554,10 +510,6 @@ def register(context, no_sets=False):
     context.register_function(list_by_int)
     context.register_function(int_by_list)
     context.register_function(combine_dicts)
-    context.register_function(eq)
-    context.register_function(neq)
-    context.register_function(eq_dict)
-    context.register_function(neq_dict)
     context.register_function(is_dict)
     context.register_function(is_list)
     context.register_function(dict_len)
@@ -577,8 +529,6 @@ def register(context, no_sets=False):
         context.register_function(set_)
         context.register_function(to_set)
         context.register_function(set_len)
-        context.register_function(set_eq)
-        context.register_function(set_neq)
         context.register_function(set_lt)
         context.register_function(set_lte)
         context.register_function(set_gt)

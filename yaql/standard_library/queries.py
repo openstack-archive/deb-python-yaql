@@ -21,8 +21,6 @@ from yaql.language import specs
 from yaql.language import utils
 from yaql.language import yaqltypes
 
-NO_VALUE = utils.create_marker('NoValue')
-
 
 class OrderingIterable(utils.IterableType):
     def __init__(self, collection, operator_lt, operator_gt):
@@ -224,11 +222,11 @@ def min_(func, collection, initial=utils.NO_VALUE):
 @specs.parameter('collection', yaqltypes.Iterable())
 @specs.parameter('default', nullable=True)
 @specs.method
-def first(collection, default=NO_VALUE):
+def first(collection, default=utils.NO_VALUE):
     try:
         return six.next(iter(collection))
     except StopIteration:
-        if default is NO_VALUE:
+        if default is utils.NO_VALUE:
             raise
         return default
 
@@ -248,10 +246,10 @@ def single(collection):
 @specs.parameter('collection', yaqltypes.Iterable())
 @specs.parameter('default', nullable=True)
 @specs.method
-def last(collection, default=NO_VALUE):
+def last(collection, default=utils.NO_VALUE):
     if isinstance(collection, utils.SequenceType):
         if len(collection) == 0:
-            if default is NO_VALUE:
+            if default is utils.NO_VALUE:
                 raise StopIteration()
             else:
                 return default
@@ -259,7 +257,7 @@ def last(collection, default=NO_VALUE):
     last_value = default
     for t in collection:
         last_value = t
-    if last_value is NO_VALUE:
+    if last_value is utils.NO_VALUE:
         raise StopIteration()
     else:
         return last_value
@@ -371,7 +369,8 @@ def zip_longest(*collections, **kwargs):
 @specs.parameter('collection2', yaqltypes.Iterable())
 @specs.parameter('predicate', yaqltypes.Lambda())
 @specs.parameter('selector', yaqltypes.Lambda())
-def join(collection1, collection2, predicate, selector):
+def join(engine, collection1, collection2, predicate, selector):
+    collection2 = utils.memorize(collection2, engine)
     for self_item in collection1:
         for other_item in collection2:
             if predicate(self_item, other_item):
@@ -410,21 +409,19 @@ def skip_while(collection, predicate):
 
 @specs.method
 @specs.parameter('collection', yaqltypes.Iterable())
-@specs.inject('operator', yaqltypes.Delegate('*equal'))
-def index_of(collection, item, operator):
+def index_of(collection, item):
     for i, t in enumerate(collection):
-        if operator(t, item):
+        if t == item:
             return i
     return -1
 
 
 @specs.method
 @specs.parameter('collection', yaqltypes.Iterable())
-@specs.inject('operator', yaqltypes.Delegate('*equal'))
-def last_index_of(collection, item, operator):
+def last_index_of(collection, item):
     index = -1
     for i, t in enumerate(collection):
-        if operator(t, item):
+        if t == item:
             index = i
     return index
 
@@ -595,15 +592,53 @@ def accumulate(collection, selector, seed=utils.NO_VALUE):
 
 
 @specs.parameter('predicate', yaqltypes.Lambda())
-@specs.parameter('next_', yaqltypes.Lambda())
+@specs.parameter('producer', yaqltypes.Lambda())
 @specs.parameter('selector', yaqltypes.Lambda())
-def generate(initial, predicate, next_, selector=None):
+@specs.parameter('decycle', bool)
+def generate(engine, initial, predicate, producer, selector=None,
+             decycle=False):
+    past_items = None if not decycle else set()
     while predicate(initial):
+        if past_items is not None:
+            if initial in past_items:
+                break
+            past_items.add(initial)
+            utils.limit_memory_usage(engine, (1, past_items))
         if selector is None:
             yield initial
         else:
             yield selector(initial)
-        initial = next_(initial)
+        initial = producer(initial)
+
+
+@specs.parameter('producer', yaqltypes.Lambda())
+@specs.parameter('selector', yaqltypes.Lambda())
+@specs.parameter('decycle', bool)
+@specs.parameter('depth_first', bool)
+def generate_many(engine, initial, producer, selector=None, decycle=False,
+                  depth_first=False):
+    past_items = None if not decycle else set()
+    queue = utils.QueueType([initial])
+    while queue:
+        item = queue.popleft()
+        if past_items is not None:
+            if item in past_items:
+                continue
+            else:
+                past_items.add(item)
+                utils.limit_memory_usage(engine, (1, past_items))
+        if selector is None:
+            yield item
+        else:
+            yield selector(item)
+        produced = producer(item)
+        if depth_first:
+            len_before = len(queue)
+            queue.extend(produced)
+            queue.rotate(len(queue) - len_before)
+        else:
+            queue.extend(produced)
+        utils.limit_memory_usage(engine, (1, queue))
 
 
 @specs.method
@@ -676,4 +711,5 @@ def register(context):
     context.register_function(is_iterable)
     context.register_function(sequence)
     context.register_function(generate)
+    context.register_function(generate_many)
     context.register_function(default_if_empty)

@@ -12,25 +12,32 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import abc
 import collections
+import datetime
 
+from dateutil import tz
 import six
 
 from yaql.language import exceptions
 from yaql.language import expressions
 from yaql.language import utils
+from yaql import yaql_interface
 
 
+@six.add_metaclass(abc.ABCMeta)
 class HiddenParameterType(object):
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def check(self, value, context, engine, *args, **kwargs):
         return True
 
 
+@six.add_metaclass(abc.ABCMeta)
 class LazyParameterType(object):
     pass
 
 
+@six.add_metaclass(abc.ABCMeta)
 class SmartType(object):
     def __init__(self, nullable):
         self.nullable = nullable
@@ -45,6 +52,7 @@ class SmartType(object):
         if not self.check(value, context, engine, *args, **kwargs):
             raise exceptions.ArgumentValueException()
         utils.limit_memory_usage(engine, (1, value))
+        return value
 
     def is_specialization_of(self, other):
         return False
@@ -138,10 +146,32 @@ class String(PythonType):
         return None if value is None else six.text_type(value)
 
 
+class Integer(PythonType):
+    def __init__(self, nullable=False):
+        super(Integer, self).__init__(
+            six.integer_types, nullable=nullable,
+            validators=[lambda t: not isinstance(t, bool)])
+
+
+class DateTime(PythonType):
+    utctz = tz.tzutc()
+
+    def __init__(self, nullable=False):
+        super(DateTime, self).__init__(datetime.datetime, nullable=nullable)
+
+    def convert(self, value, *args, **kwargs):
+        if isinstance(value, datetime.datetime):
+            if value.tzinfo is None:
+                return value.replace(tzinfo=self.utctz)
+            else:
+                return value
+        return super(DateTime, self).convert(value, *args, **kwargs)
+
+
 class Iterable(PythonType):
-    def __init__(self, validators=None):
+    def __init__(self, validators=None, nullable=False):
         super(Iterable, self).__init__(
-            collections.Iterable, False, [
+            collections.Iterable, nullable, [
                 lambda t: not isinstance(t, six.string_types + (
                     utils.MappingType,))] + (validators or []))
 
@@ -156,19 +186,20 @@ class Iterable(PythonType):
                 *args, **kwargs):
         res = super(Iterable, self).convert(
             value, receiver, context, function_spec, engine, *args, **kwargs)
-        return utils.limit_iterable(res, engine)
+        return None if res is None else utils.limit_iterable(res, engine)
 
 
 class Iterator(Iterable):
-    def __init__(self, validators=None):
+    def __init__(self, validators=None, nullable=False):
         super(Iterator, self).__init__(
-            validators=[utils.is_iterator] + (validators or []))
+            validators=[utils.is_iterator] + (validators or []),
+            nullable=nullable)
 
 
 class Sequence(PythonType):
-    def __init__(self, validators=None):
+    def __init__(self, validators=None, nullable=False):
         super(Sequence, self).__init__(
-            collections.Sequence, False, [
+            collections.Sequence, nullable, [
                 lambda t: not isinstance(t, six.string_types + (dict,))] + (
                     validators or []))
 
@@ -176,8 +207,8 @@ class Sequence(PythonType):
 class Number(PythonType):
     def __init__(self, nullable=False):
         super(Number, self).__init__(
-            six.integer_types + (float,), nullable, [
-                lambda t: type(t) is not bool])
+            six.integer_types + (float,), nullable,
+            validators=[lambda t: not isinstance(t, bool)])
 
 
 class Lambda(LazyParameterType, SmartType):
@@ -203,8 +234,10 @@ class Lambda(LazyParameterType, SmartType):
         self._publish_params(context, args, kwargs)
         if isinstance(value, expressions.Expression):
             result = value(receiver, context, engine)
+        elif six.callable(value):
+            result = value(*args, **kwargs)
         else:
-            result = value, context
+            result = value
         return result
 
     def convert(self, value, receiver, context, function_spec, engine,
@@ -302,11 +335,13 @@ class Context(HiddenParameterType, SmartType):
 
 
 class Delegate(HiddenParameterType, SmartType):
-    def __init__(self, name=None, with_context=False, method=False):
+    def __init__(self, name=None, with_context=False, method=False,
+                 use_convention=True):
         super(Delegate, self).__init__(False)
         self.name = name
         self.with_context = with_context
         self.method = method
+        self.use_convention = use_convention
 
     def convert(self, value, receiver, context, function_spec, engine,
                 *convert_args, **convert_kwargs):
@@ -331,7 +366,7 @@ class Delegate(HiddenParameterType, SmartType):
 
             return new_context(
                 name, engine, new_receiver,
-                use_convention=True)(*args, **kwargs)
+                use_convention=self.use_convention)(*args, **kwargs)
         func.__unwrapped__ = value
         return func
 
@@ -381,11 +416,16 @@ class Constant(SmartType):
 
 
 class YaqlExpression(LazyParameterType, SmartType):
-    def __init__(self):
+    def __init__(self, expression_type=None):
         super(YaqlExpression, self).__init__(False)
+        if expression_type and not utils.is_sequence(expression_type):
+            expression_type = (expression_type,)
+        self._expression_types = expression_type
 
     def check(self, value, context, *args, **kwargs):
-        return isinstance(value, expressions.Expression)
+        if not self._expression_types:
+            return isinstance(value, expressions.Expression)
+        return any(t == type(value) for t in self._expression_types)
 
     def convert(self, value, receiver, context, function_spec, engine,
                 *args, **kwargs):
@@ -432,3 +472,124 @@ class NumericConstant(Constant):
             value is None or isinstance(
                 value.value, six.integer_types + (float,)) and
             type(value.value) is not bool)
+
+
+@six.add_metaclass(abc.ABCMeta)
+class SmartTypeAggregation(SmartType):
+    def __init__(self, *args, **kwargs):
+        self.nullable = kwargs.pop('nullable', False)
+        super(SmartTypeAggregation, self).__init__(self.nullable)
+
+        self.types = []
+        for item in args:
+            if isinstance(item, (type, tuple)):
+                item = PythonType(item)
+            if isinstance(item, (HiddenParameterType, LazyParameterType)):
+                raise ValueError('Special smart types are not supported')
+            self.types.append(item)
+
+
+class AnyOf(SmartTypeAggregation):
+    def _check_match(self, value, context, engine, *args, **kwargs):
+        for type_to_check in self.types:
+            check_result = type_to_check.check(
+                value, context, engine, *args, **kwargs)
+            if check_result:
+                return type_to_check
+
+    def check(self, value, context, engine, *args, **kwargs):
+        if isinstance(value, expressions.Constant):
+            value = value.value
+
+        if value is None:
+            return self.nullable
+
+        check_result = self._check_match(
+            value, context, engine, *args, **kwargs)
+        return True if check_result else False
+
+    def convert(self, value, receiver, context, function_spec, engine,
+                *args, **kwargs):
+        if isinstance(value, expressions.Constant):
+            value = value.value
+
+        if value is None:
+            if self.nullable:
+                return None
+            else:
+                suitable_type = None
+        else:
+            suitable_type = self._check_match(
+                value, context, engine, *args, **kwargs)
+        if suitable_type:
+            return suitable_type.convert(
+                value, receiver, context, function_spec,
+                engine, *args, **kwargs)
+        raise exceptions.ArgumentValueException()
+
+
+class Chain(SmartTypeAggregation):
+    def _check_match(self, value, context, engine, *args, **kwargs):
+        for type_to_check in self.types:
+            check_result = type_to_check.check(
+                value, context, engine, *args, **kwargs)
+            if check_result:
+                return type_to_check
+
+    def check(self, value, context, engine, *args, **kwargs):
+        if isinstance(value, expressions.Constant):
+            value = value.value
+
+        if value is None:
+            return self.nullable
+
+        for type_to_check in self.types:
+            if not type_to_check.check(
+                    value, context, engine, *args, **kwargs):
+                return False
+
+        return True
+
+    def convert(self, value, receiver, context, function_spec, engine,
+                *args, **kwargs):
+        if isinstance(value, expressions.Constant):
+            value = value.value
+
+        if value is None:
+            if self.nullable:
+                return None
+            raise exceptions.ArgumentValueException()
+
+        for smart_type in self.types:
+            value = smart_type.convert(
+                value, receiver, context, function_spec,
+                engine, *args, **kwargs)
+        return value
+
+
+class NotOfType(SmartType):
+    def __init__(self, smart_type, nullable=True):
+        if isinstance(smart_type, (type, tuple)):
+            smart_type = PythonType(smart_type, nullable=nullable)
+        self.smart_type = smart_type
+        super(NotOfType, self).__init__(nullable)
+
+    def check(self, value, context, engine, *args, **kwargs):
+        if isinstance(value, expressions.Constant):
+            value = value.value
+        if not super(NotOfType, self).check(
+                value, context, engine, *args, **kwargs):
+            return False
+        if value is None or isinstance(value, expressions.Expression):
+            return True
+        return not self.smart_type.check(
+            value, context, engine, *args, **kwargs)
+
+
+class YaqlInterface(HiddenParameterType, SmartType):
+    def __init__(self):
+        super(YaqlInterface, self).__init__(False)
+
+    def convert(self, value, receiver, context, function_spec, engine,
+                *args, **kwargs):
+        return yaql_interface.YaqlInterface(context, engine, receiver)

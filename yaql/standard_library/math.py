@@ -103,20 +103,6 @@ def abs_(op):
     return abs(op)
 
 
-@specs.parameter('left', yaqltypes.Number())
-@specs.parameter('right', yaqltypes.Number())
-@specs.name('*equal')
-def eq(left, right):
-    return left == right
-
-
-@specs.parameter('left', yaqltypes.Number())
-@specs.parameter('right', yaqltypes.Number())
-@specs.name('*not_equal')
-def neq(left, right):
-    return left != right
-
-
 def int_(value):
     if value is None:
         return 0
@@ -210,6 +196,15 @@ def round_(number, ndigits=0):
     return round(number, ndigits)
 
 
+def is_integer(value):
+    return isinstance(value, six.integer_types) and not isinstance(value, bool)
+
+
+def is_number(value):
+    return (isinstance(value, six.integer_types + (float,))
+            and not isinstance(value, bool))
+
+
 def register(context):
     context.register_function(binary_plus)
     context.register_function(binary_minus)
@@ -223,8 +218,6 @@ def register(context):
     context.register_function(gte)
     context.register_function(lt)
     context.register_function(lte)
-    context.register_function(eq)
-    context.register_function(neq)
     context.register_function(int_)
     context.register_function(float_)
     context.register_function(random_)
@@ -240,3 +233,5 @@ def register(context):
     context.register_function(pow_)
     context.register_function(sign)
     context.register_function(round_)
+    context.register_function(is_integer)
+    context.register_function(is_number)

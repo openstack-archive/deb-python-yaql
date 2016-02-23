@@ -369,6 +369,32 @@ def _infer_parameter_type(name):
         return yaqltypes.Context()
     elif name == 'engine' or name == '__engine':
         return yaqltypes.Engine()
+    elif name == 'yaql_interface' or name == '__yaql_interface':
+        return yaqltypes.YaqlInterface()
+
+
+def convert_function_name(function_name, convention):
+    if not function_name:
+        return function_name
+    function_name = function_name.rstrip('_')
+    if not convention:
+        return function_name
+    if not function_name[0].isalpha():
+        finish = function_name.find(function_name[0], 1)
+        if finish <= 1:
+            return function_name
+        return function_name[:finish + 1] + convention.convert_function_name(
+            function_name[finish + 1:])
+    return convention.convert_function_name(function_name)
+
+
+def convert_parameter_name(parameter_name, convention):
+    if not parameter_name:
+        return parameter_name
+    parameter_name = parameter_name.rstrip('_')
+    if not convention:
+        return parameter_name
+    return convention.convert_parameter_name(parameter_name)
 
 
 def get_function_definition(func, name=None, function=None, method=None,
@@ -398,13 +424,9 @@ def get_function_definition(func, name=None, function=None, method=None,
     if name is not None:
         fd.name = name
     elif fd.name is None:
-        if convention is not None:
-            fd.name = convention.convert_function_name(
-                fd.payload.__name__.rstrip('_'))
-        else:
-            fd.name = fd.payload.__name__.rstrip('_')
+        fd.name = convert_function_name(fd.payload.__name__, convention)
     elif convention is not None:
-        fd.name = convention.convert_function_name(fd.name.rstrip('_'))
+        fd.name = convert_function_name(fd.name, convention)
 
     if function is not None:
         fd.is_function = function
@@ -413,8 +435,7 @@ def get_function_definition(func, name=None, function=None, method=None,
     if convention:
         for p in six.itervalues(fd.parameters):
             if p.alias is None:
-                p.alias = convention.convert_parameter_name(p.name.rstrip('_'))
-
+                p.alias = convert_parameter_name(p.name, convention)
     return fd
 
 
@@ -474,3 +495,13 @@ def meta(name, value):
         fd.meta[name] = value
         return func
     return wrapper
+
+
+def yaql_property(source_type):
+    def decorator(func):
+        @name('#property#{0}'.format(get_function_definition(func).name))
+        @parameter('obj', source_type)
+        def wrapper(obj):
+            return func(obj)
+        return wrapper
+    return decorator

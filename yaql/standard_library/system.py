@@ -117,6 +117,23 @@ def lambda_(func):
     return func
 
 
+@specs.name('#operator_.')
+@specs.parameter('name', yaqltypes.Keyword())
+@specs.inject('func', yaqltypes.Delegate(use_convention=False))
+def get_property(func, obj, name):
+    func_name = '#property#{0}'.format(name)
+    return func(func_name, obj)
+
+
+@specs.name('call')
+@specs.parameter('name', yaqltypes.String())
+@specs.parameter('args', yaqltypes.Sequence())
+@specs.parameter('kwargs', utils.MappingType)
+def call_func(context, engine, name, args, kwargs, receiver=utils.NO_VALUE):
+    return context(name, engine, receiver)(
+        *args, **utils.filter_parameters_dict(kwargs))
+
+
 def register(context, delegates=False):
     context.register_function(get_context_data)
     context.register_function(op_dot)
@@ -127,6 +144,11 @@ def register(context, delegates=False):
     context.register_function(def_)
     context.register_function(elvis_operator)
     context.register_function(assert__)
+    context.register_function(call_func)
     if delegates:
         context.register_function(call)
         context.register_function(lambda_)
+
+
+def register_fallbacks(context):
+    context.register_function(get_property)

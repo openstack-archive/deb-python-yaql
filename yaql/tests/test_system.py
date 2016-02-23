@@ -13,6 +13,7 @@
 #    under the License.
 
 from yaql.language import exceptions
+from yaql.language import specs
 import yaql.tests
 
 
@@ -141,3 +142,56 @@ class TestSystem(yaql.tests.TestCase):
         self.assertEqual([4, 5, 6], self.eval(
             '$.where(lambda($ > 3)())',
             data=data))
+
+    def test_properties(self):
+        @specs.yaql_property(int)
+        def neg_value(value):
+            return -value
+
+        self.context.register_function(neg_value)
+        self.assertEqual(-123, self.eval('123.negValue'))
+        self.assertRaises(exceptions.NoMatchingFunctionException,
+                          self.eval, '"123".negValue')
+        self.assertRaises(exceptions.NoMatchingFunctionException,
+                          self.eval, 'null.negValue')
+        self.assertRaises(exceptions.NoFunctionRegisteredException,
+                          self.eval, '123.neg_value')
+
+    def test_call_function(self):
+        self.assertEqual(
+            2,
+            self.eval('call(len, [[1,2]], {})'))
+        self.assertEqual(
+            2,
+            self.eval('call(len, [], {"sequence" => [1,2]})'))
+        self.assertRaises(
+            exceptions.NoMatchingFunctionException,
+            self.eval, 'call(len, [[1,2]], null)')
+        self.assertRaises(
+            exceptions.NoMatchingFunctionException,
+            self.eval, 'call(len, null, {sequence => [1,2]})')
+        self.assertRaises(
+            exceptions.NoMatchingFunctionException,
+            self.eval, 'call(len, [], {invalid => [1,2]})')
+        self.assertRaises(
+            exceptions.NoMatchingFunctionException,
+            self.eval, 'call(len, [1, 2], {})')
+        self.assertTrue(self.eval('call(isEmpty, [null], {})'))
+
+    def test_call_method(self):
+        self.assertEqual(
+            2,
+            self.eval('call(len, [], {}, [1,2])'))
+        self.assertRaises(
+            exceptions.NoMatchingMethodException,
+            self.eval, 'call(len, [[1,2]], {}, [1,2])')
+        self.assertRaises(
+            exceptions.NoMatchingMethodException,
+            self.eval, 'call(len, [], {sequence => [1,2]}, [1, 2])')
+        self.assertRaises(
+            exceptions.NoMatchingFunctionException,
+            self.eval, 'call(len, [], null, [1, 2])')
+        self.assertRaises(
+            exceptions.NoMatchingFunctionException,
+            self.eval, 'call(len, null, {sequence => [1,2]}, [1, 2])')
+        self.assertTrue(self.eval('call(isEmpty, [], {}, null)'))

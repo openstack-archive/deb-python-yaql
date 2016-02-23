@@ -128,6 +128,7 @@ class TestQueries(yaql.tests.TestCase):
         self.assertEqual(4, self.eval('list(2, 3).select($ * 2).first()'))
         self.assertIsNone(self.eval('list().first(null)'))
         self.assertRaises(StopIteration, self.eval, 'list().first()')
+        self.assertEqual(99, self.eval('list().first(99)'))
 
     def test_single(self):
         self.assertEqual(2, self.eval('list(2).single()'))
@@ -138,6 +139,7 @@ class TestQueries(yaql.tests.TestCase):
         self.assertEqual(3, self.eval('list(2, 3).last()'))
         self.assertEqual(6, self.eval('list(2, 3).select($ * 2).last()'))
         self.assertIsNone(self.eval('list().last(null)'))
+        self.assertEqual(99, self.eval('list().last(99)'))
         self.assertRaises(StopIteration, self.eval, 'list().last()')
 
     def test_range(self):
@@ -369,6 +371,35 @@ class TestQueries(yaql.tests.TestCase):
         self.assertEqual(
             [0, 4, 16, 36, 64],
             self.eval('generate(0, $ < 10, $ + 2, $ * $)'))
+
+    def test_generate_many(self):
+        friends = {
+            'John': ['Jim'],
+            'Jim': ['Jay', 'Jax'],
+            'Jax': ['John', 'Jacob', 'Jonathan'],
+            'Jacob': ['Jonathan', 'Jenifer'],
+        }
+        self.assertEqual(
+            ['John', 'Jim', 'Jay', 'Jax', 'Jacob', 'Jonathan', 'Jenifer'],
+            self.eval(
+                'generateMany(John, $data.get($, []), decycle => true)',
+                friends))
+
+        self.assertEqual(
+            ['John', 'Jim', 'Jay', 'Jax', 'Jacob', 'Jonathan', 'Jenifer'],
+            self.eval(
+                'generateMany(John, $data.get($, []), '
+                'decycle => true, depthFirst => true)', friends))
+
+        self.assertEqual(
+            ['Jay'],
+            self.eval('generateMany(Jay, $data.get($, []))', friends))
+
+        self.assertEqual(
+            ['JAX', 'JOHN', 'JACOB', 'JONATHAN', 'JIM', 'JENIFER', 'JAY'],
+            self.eval(
+                'generateMany(Jax, $data.get($, []), $.toUpper(), '
+                'decycle => true)', friends))
 
     def test_max(self):
         self.assertEqual(

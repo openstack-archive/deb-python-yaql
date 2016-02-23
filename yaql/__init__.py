@@ -25,15 +25,31 @@ from yaql.standard_library import boolean as std_boolean
 from yaql.standard_library import branching as std_branching
 from yaql.standard_library import collections as std_collections
 from yaql.standard_library import common as std_common
+from yaql.standard_library import date_time as std_datetime
 from yaql.standard_library import math as std_math
 from yaql.standard_library import queries as std_queries
 from yaql.standard_library import regex as std_regex
 from yaql.standard_library import strings as std_strings
 from yaql.standard_library import system as std_system
+from yaql.standard_library import yaqlized as std_yaqlized
 
 _cached_expressions = {}
 _cached_engine = None
 _default_context = None
+
+
+def detect_version():
+    try:
+        dist = pkg_resources.get_distribution('yaql')
+        location = os.path.normcase(dist.location)
+        this_location = os.path.normcase(__file__)
+        if not this_location.startswith(os.path.join(location, 'yaql')):
+            raise pkg_resources.DistributionNotFound()
+        return dist.version
+    except pkg_resources.DistributionNotFound:
+        return 'Undefined (package was not installed with setuptools)'
+
+__version__ = detect_version()
 
 
 def _setup_context(data, context, finalizer, convention):
@@ -68,10 +84,12 @@ def create_context(data=utils.NO_VALUE, context=None, system=True,
                    math=True, collections=True, queries=True,
                    regex=True, branching=True,
                    no_sets=False, finalizer=None, delegates=False,
-                   convention=None):
+                   convention=None, datetime=True, yaqlized=True):
 
     context = _setup_context(data, context, finalizer, convention)
     if system:
+        std_system.register_fallbacks(context)
+        context = context.create_child_context()
         std_system.register(context, delegates)
     if common:
         std_common.register(context)
@@ -89,23 +107,14 @@ def create_context(data=utils.NO_VALUE, context=None, system=True,
         std_regex.register(context)
     if branching:
         std_branching.register(context)
+    if datetime:
+        std_datetime.register(context)
+    if yaqlized:
+        context = std_yaqlized.register(context)
+
     return context
 
 YaqlFactory = factory.YaqlFactory
-
-
-def detect_version():
-    try:
-        dist = pkg_resources.get_distribution('yaql')
-        location = os.path.normcase(dist.location)
-        this_location = os.path.normcase(__file__)
-        if not this_location.startswith(os.path.join(location, 'yaql')):
-            raise pkg_resources.DistributionNotFound()
-        return dist.version
-    except pkg_resources.DistributionNotFound:
-        return 'Undefined (package was not installed with setuptools)'
-
-__version__ = detect_version()
 
 
 def eval(expression, data=None):
@@ -114,13 +123,13 @@ def eval(expression, data=None):
     if _cached_engine is None:
         _cached_engine = YaqlFactory().create()
 
-    engine = _cached_expressions.get(expression)
-    if engine is None:
-        engine = _cached_engine(expression)
-        _cached_expressions[expression] = engine
+    parsed_expression = _cached_expressions.get(expression)
+    if parsed_expression is None:
+        parsed_expression = _cached_engine(expression)
+        _cached_expressions[expression] = parsed_expression
 
     if _default_context is None:
         _default_context = create_context()
 
-    return engine.evaluate(
+    return parsed_expression.evaluate(
         data=data, context=_default_context.create_child_context())
