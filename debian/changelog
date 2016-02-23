@@ -1,6 +1,7 @@
 python-yaql (1.1.0-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+  * d/control: Align (Build-)Depends with upstream.
 
  -- Corey Bryant <corey.bryant@canonical.com>  Tue, 23 Feb 2016 11:04:21 -0500
 
