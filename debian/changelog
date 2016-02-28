@@ -1,7 +1,11 @@
 python-yaql (1.1.0-1) UNRELEASED; urgency=medium
 
+  [ Corey Bryant ]
   * New upstream release.
   * d/control: Align (Build-)Depends with upstream and update uploaders.
+
+  [ Ondřej Nový ]
+  * Fixed VCS URLs (https).
 
  -- Corey Bryant <corey.bryant@canonical.com>  Tue, 23 Feb 2016 11:04:21 -0500
 
