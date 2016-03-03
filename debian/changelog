@@ -1,4 +1,4 @@
-python-yaql (1.1.0-1) UNRELEASED; urgency=medium
+python-yaql (1.1.0-1) experimental; urgency=medium
 
   [ Corey Bryant ]
   * New upstream release.
@@ -7,7 +7,10 @@ python-yaql (1.1.0-1) UNRELEASED; urgency=medium
   [ Ondřej Nový ]
   * Fixed VCS URLs (https).
 
- -- Corey Bryant <corey.bryant@canonical.com>  Tue, 23 Feb 2016 11:04:21 -0500
+  [ Thomas Goirand ]
+  * Standards-Version: 3.9.7 (no change).
+
+ -- Thomas Goirand <zigo@debian.org>  Fri, 04 Mar 2016 01:40:02 +0800
 
 python-yaql (1.0.2-1) experimental; urgency=medium
 
