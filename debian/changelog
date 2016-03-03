@@ -9,6 +9,7 @@ python-yaql (1.1.0-1) experimental; urgency=medium
 
   [ Thomas Goirand ]
   * Standards-Version: 3.9.7 (no change).
+  * Fixed debian/copyright ordering.
 
  -- Thomas Goirand <zigo@debian.org>  Fri, 04 Mar 2016 01:40:02 +0800
 
