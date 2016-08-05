@@ -5,6 +5,8 @@ python-yaql (1.1.1-1) UNRELEASED; urgency=medium
   * d/rules: Changed UPSTREAM_GIT to new URL
   * d/copyright: Changed source URL to new one
   * Enabled autopkgtest-pkg-python testsuite
+  * Bump required openstack-pkg-tools version to 52
+  * d/rules: Cleanup and use pkgos-dh_* tools
 
  -- Ondřej Nový <novy@ondrej.org>  Sat, 09 Apr 2016 19:31:49 +0200
 
