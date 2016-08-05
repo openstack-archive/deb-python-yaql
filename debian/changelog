@@ -1,5 +1,6 @@
-python-yaql (1.1.1-1) UNRELEASED; urgency=medium
+python-yaql (1.1.1-1) unstable; urgency=medium
 
+  * Team upload.
   * New upstream release
   * Standards-Version is 3.9.8 now (no change)
   * d/rules: Changed UPSTREAM_GIT to new URL
@@ -9,7 +10,7 @@ python-yaql (1.1.1-1) UNRELEASED; urgency=medium
   * d/rules: Cleanup and use pkgos-dh_* tools
   * d/watch: Changed URL to new one
 
- -- Ondřej Nový <novy@ondrej.org>  Sat, 09 Apr 2016 19:31:49 +0200
+ -- Ondřej Nový <onovy@debian.org>  Fri, 05 Aug 2016 23:33:54 +0200
 
 python-yaql (1.1.0-2) unstable; urgency=medium
 
