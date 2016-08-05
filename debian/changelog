@@ -4,6 +4,7 @@ python-yaql (1.1.1-1) UNRELEASED; urgency=medium
   * Standards-Version is 3.9.8 now (no change)
   * d/rules: Changed UPSTREAM_GIT to new URL
   * d/copyright: Changed source URL to new one
+  * Enabled autopkgtest-pkg-python testsuite
 
  -- Ondřej Nový <novy@ondrej.org>  Sat, 09 Apr 2016 19:31:49 +0200
 
