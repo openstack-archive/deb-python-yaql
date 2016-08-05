@@ -1,5 +1,6 @@
-python-yaql (1.1.0-3) UNRELEASED; urgency=medium
+python-yaql (1.1.1-1) UNRELEASED; urgency=medium
 
+  * New upstream release
   * Standards-Version is 3.9.8 now (no change)
   * d/rules: Changed UPSTREAM_GIT to new URL
   * d/copyright: Changed source URL to new one
