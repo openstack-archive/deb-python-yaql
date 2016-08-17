@@ -1,0 +1,9 @@
+Code-Review+2: Stan Lagun <slagun@mirantis.com>
+Code-Review+2: Serg Melikyan <smelikyan@mirantis.com>
+Workflow+1: Serg Melikyan <smelikyan@mirantis.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Wed, 10 Aug 2016 11:16:15 +0000
+Reviewed-on: https://review.openstack.org/324587
+Project: openstack/deb-python-yaql
+Branch: refs/heads/master
