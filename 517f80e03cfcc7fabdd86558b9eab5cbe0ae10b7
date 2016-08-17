@@ -1,0 +1,9 @@
+Code-Review+2: Stan Lagun <slagun@mirantis.com>
+Code-Review+2: Serg Melikyan <smelikyan@mirantis.com>
+Workflow+1: Stan Lagun <slagun@mirantis.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Wed, 16 Sep 2015 16:12:41 +0000
+Reviewed-on: https://review.openstack.org/224146
+Project: openstack/deb-python-yaql
+Branch: refs/heads/stable/liberty
