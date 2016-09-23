@@ -1,0 +1,14 @@
+Code-Review+2: Stan Lagun <slagun@mirantis.com>
+Code-Review+1: Valerii Kovalchuk <vakovalchuk@mirantis.com>
+Code-Review+1: Dmytro Dovbii <ddovbii@mirantis.com>
+Code-Review+1: Kirill Zaitsev <kzaitsev@mirantis.com>
+Code-Review+2: Serg Melikyan <smelikyan@mirantis.com>
+Code-Review+1: Nikolay Starodubtsev <starodubcevna@gmail.com>
+Code-Review+2: Alexander Tivelkov <ativelkov@mirantis.com>
+Workflow+1: Alexander Tivelkov <ativelkov@mirantis.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Thu, 22 Sep 2016 10:19:50 +0000
+Reviewed-on: https://review.openstack.org/324583
+Project: openstack/deb-python-yaql
+Branch: refs/heads/master
