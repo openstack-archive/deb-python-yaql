@@ -1,0 +1,9 @@
+Code-Review+1: Kirill Zaitsev <k.zaitsev@me.com>
+Code-Review+2: Serg Melikyan <smelikyan@mirantis.com>
+Workflow+1: Serg Melikyan <smelikyan@mirantis.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Wed, 30 Nov 2016 22:40:21 +0000
+Reviewed-on: https://review.openstack.org/389254
+Project: openstack/deb-python-yaql
+Branch: refs/heads/master
