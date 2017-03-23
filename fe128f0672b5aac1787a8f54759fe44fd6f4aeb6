@@ -1,0 +1,11 @@
+Code-Review+1: Davanum Srinivas (dims) <davanum@gmail.com>
+Code-Review+1: Alexander Kislitsky <akislitsky@mirantis.com>
+Code-Review+1: Alexander Tivelkov <locher@yandex.ru>
+Code-Review+2: Stan Lagun <slagun@mirantis.com>
+Workflow+1: Stan Lagun <slagun@mirantis.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Wed, 01 Mar 2017 15:32:53 +0000
+Reviewed-on: https://review.openstack.org/439391
+Project: openstack/deb-python-yaql
+Branch: refs/heads/master

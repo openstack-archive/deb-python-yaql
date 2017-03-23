@@ -1,0 +1,11 @@
+Code-Review+1: Renat Akhmerov <renat.akhmerov@gmail.com>
+Code-Review+1: Felipe Monteiro <felipe.monteiro@att.com>
+Code-Review+1: Kirill Zaitsev <k.zaitsev@me.com>
+Code-Review+2: Stan Lagun <slagun@mirantis.com>
+Workflow+1: Stan Lagun <slagun@mirantis.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Wed, 22 Feb 2017 17:58:19 +0000
+Reviewed-on: https://review.openstack.org/436262
+Project: openstack/deb-python-yaql
+Branch: refs/heads/master
